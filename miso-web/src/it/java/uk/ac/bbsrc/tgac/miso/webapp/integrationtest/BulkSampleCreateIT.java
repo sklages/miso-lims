@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -181,6 +182,36 @@ public class BulkSampleCreateIT extends AbstractBulkSampleIT {
     table.enterText(SamColumns.IDENTITY_ALIAS, 0, "Identity 1");
     table.waitForSearch(SamColumns.IDENTITY_ALIAS, 0);
     assertTrue("identity alias no longer empty", !isStringEmptyOrNull(table.getText(SamColumns.IDENTITY_ALIAS, 0)));
+  }
+
+  @Test
+  public void testCreateTissueFindExistingIdentityInProject() throws Exception {
+    BulkSamplePage page = getCreatePage(1, 3L, 23L);
+    HandsOnTable table = page.getTable();
+
+    assertTrue("identity alias is empty", isStringEmptyOrNull(table.getText(SamColumns.IDENTITY_ALIAS, 0)));
+    table.enterText(SamColumns.IDENTITY_ALIAS, 0, "TEST_external_1");
+    table.waitForSearch(SamColumns.IDENTITY_ALIAS, 0);
+    assertTrue("identity alias no longer empty", !isStringEmptyOrNull(table.getText(SamColumns.IDENTITY_ALIAS, 0)));
+    Set<String> availableIdentities = table.getDropdownOptions(SamColumns.IDENTITY_ALIAS, 0);
+    assertTrue(availableIdentities.stream().filter(extName -> extName.contains("undefined")).collect(Collectors.toSet()).isEmpty());
+    assertTrue(availableIdentities.stream().filter(extName -> extName.contains("First Receipt")).collect(Collectors.toSet()).isEmpty());
+    assertFalse(availableIdentities.stream().filter(extName -> extName.contains("TEST_0001 ")).collect(Collectors.toSet()).isEmpty());
+  }
+
+  @Test
+  public void testCreateTissueFindExistingIdentityInOtherProject() throws Exception {
+    BulkSamplePage page = getCreatePage(1, 3L, 23L);
+    HandsOnTable table = page.getTable();
+
+    assertTrue("identity alias is empty", isStringEmptyOrNull(table.getText(SamColumns.IDENTITY_ALIAS, 0)));
+    table.enterText(SamColumns.IDENTITY_ALIAS, 0, "TIB_identity_1");
+    table.waitForSearch(SamColumns.IDENTITY_ALIAS, 0);
+    assertTrue("identity alias no longer empty", !isStringEmptyOrNull(table.getText(SamColumns.IDENTITY_ALIAS, 0)));
+    Set<String> availableIdentities = table.getDropdownOptions(SamColumns.IDENTITY_ALIAS, 0);
+    assertTrue(availableIdentities.stream().filter(extName -> extName.contains("undefined")).collect(Collectors.toSet()).isEmpty());
+    assertFalse(availableIdentities.stream().filter(extName -> extName.contains("First Receipt")).collect(Collectors.toSet()).isEmpty());
+    assertFalse(availableIdentities.stream().filter(extName -> extName.contains("TIB_0001 ")).collect(Collectors.toSet()).isEmpty());
   }
 
   @Test
