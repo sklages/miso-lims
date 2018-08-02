@@ -6,19 +6,19 @@ public enum QcCorrespondingField {
     @Override
     public void updateField(Pool pool, double value, String units) {
       pool.setConcentration(value);
-      pool.setConcentrationUnits(units);
+      pool.setConcentrationUnits(ConcentrationUnit.getFromString(units));
     }
 
     @Override
     public void updateField(Library library, double value, String units) {
       library.setInitialConcentration(value);
-      library.setConcentrationUnits(units);
+      library.setConcentrationUnits(ConcentrationUnit.getFromString(units));
     }
 
     @Override
     public void updateField(Sample sample, double value, String units) {
       sample.setConcentration(value);
-      sample.setConcentrationUnits(units);
+      sample.setConcentrationUnits(ConcentrationUnit.getFromString(units));
     }
 
   },
@@ -27,19 +27,19 @@ public enum QcCorrespondingField {
     @Override
     public void updateField(Pool pool, double value, String units) {
       pool.setVolume(value);
-      pool.setVolumeUnits(units);
+      pool.setVolumeUnits(VolumeUnit.getFromString(units));
     }
 
     @Override
     public void updateField(Library library, double value, String units) {
       library.setVolume(value);
-      library.setVolumeUnits(units);
+      library.setVolumeUnits(VolumeUnit.getFromString(units));
     }
 
     @Override
     public void updateField(Sample sample, double value, String units) {
       sample.setVolume(value);
-      sample.setVolumeUnits(units);
+      sample.setVolumeUnits(VolumeUnit.getFromString(units));
     }
 
   },
