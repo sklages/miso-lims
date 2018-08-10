@@ -269,7 +269,7 @@ public class DefaultSampleService implements SampleService, AuthorizedPaginatedD
       sample.setAlias(generateTemporaryName());
     }
     long savedId = save(sample, true).getId();
-    boxService.updateBoxableLocation(sample, null);
+    boxService.updateBoxableLocation(sample);
     return savedId;
   }
 
@@ -692,7 +692,7 @@ public class DefaultSampleService implements SampleService, AuthorizedPaginatedD
     }
 
     save(managed, validateAliasUniqueness);
-    boxService.updateBoxableLocation(sample, managed);
+    boxService.updateBoxableLocation(sample);
   }
 
   /**

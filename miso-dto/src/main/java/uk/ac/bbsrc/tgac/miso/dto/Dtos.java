@@ -29,6 +29,7 @@ import uk.ac.bbsrc.tgac.miso.core.data.Array;
 import uk.ac.bbsrc.tgac.miso.core.data.ArrayModel;
 import uk.ac.bbsrc.tgac.miso.core.data.ArrayRun;
 import uk.ac.bbsrc.tgac.miso.core.data.Box;
+import uk.ac.bbsrc.tgac.miso.core.data.BoxPosition;
 import uk.ac.bbsrc.tgac.miso.core.data.ChangeLog;
 import uk.ac.bbsrc.tgac.miso.core.data.DetailedLibrary;
 import uk.ac.bbsrc.tgac.miso.core.data.DetailedQcStatus;
@@ -307,7 +308,7 @@ public class Dtos {
     return dto;
   }
 
-  private static SampleDto copySampleFields(Sample from, SampleDto dto, boolean includeBoxables) {
+  private static SampleDto copySampleFields(Sample from, SampleDto dto, boolean includeBoxPositions) {
     dto.setId(from.getId());
     dto.setName(from.getName());
     dto.setDescription(from.getDescription());
@@ -316,7 +317,7 @@ public class Dtos {
     dto.setLocationBarcode(from.getLocationBarcode());
     dto.setLocationLabel(BoxUtils.makeLocationLabel(from));
     if (from.getBox() != null) {
-      dto.setBox(asDto(from.getBox(), includeBoxables));
+      dto.setBox(asDto(from.getBox(), includeBoxPositions));
       dto.setBoxPosition(from.getBoxPosition());
     }
     dto.setSampleType(from.getSampleType());
@@ -1226,13 +1227,13 @@ public class Dtos {
     return to;
   }
 
-  public static List<BoxDto> asBoxDtos(Collection<Box> boxes, boolean includeBoxables) {
+  public static List<BoxDto> asBoxDtosWithPositions(Collection<Box> boxes) {
     return boxes.stream()
-        .map(box -> asDto(box, includeBoxables))
+        .map(box -> asDto(box, true))
         .collect(Collectors.toList());
   }
 
-  public static BoxDto asDto(Box from, boolean includeBoxables) {
+  public static BoxDto asDto(Box from, boolean includePositions) {
     BoxDto dto = new BoxDto();
     dto.setId(from.getId());
     dto.setName(from.getName());
@@ -1250,8 +1251,8 @@ public class Dtos {
       dto.setCols(from.getSize().getColumns());
       dto.setScannable(from.getSize().getScannable());
     }
-    if (includeBoxables && from.getBoxables() != null) {
-      dto.setItems(asBoxablesDtos(from.getBoxables()));
+    if (includePositions) {
+      dto.setItems(from.getBoxPositions().values().stream().map(Dtos::asDto).collect(Collectors.toList()));
     }
     if (from.getStorageLocation() != null) {
       dto.setStorageLocationBarcode(from.getStorageLocation().getIdentificationBarcode());
@@ -1262,8 +1263,18 @@ public class Dtos {
     return dto;
   }
 
-  private static List<BoxableDto> asBoxablesDtos(Map<String, BoxableView> boxables) {
-    return boxables.entrySet().stream().map(entry -> asDto(entry.getValue())).collect(Collectors.toList());
+  private static BoxableDto asDto(BoxPosition from) {
+    BoxableDto dto = new BoxableDto();
+    dto.setCoordinates(from.getPosition());
+    dto.setEntityType(from.getBoxableId().getTargetType());
+    dto.setId(from.getBoxableId().getTargetId());
+    return dto;
+  }
+
+  public static BoxDto asDtoWithBoxables(Box from, Collection<BoxableView> boxables) {
+    BoxDto dto = asDto(from, false);
+    dto.setItems(boxables.stream().map(Dtos::asDto).collect(Collectors.toList()));
+    return dto;
   }
 
   public static List<BoxableDto> asBoxableDtos(List<BoxableView> boxables) {

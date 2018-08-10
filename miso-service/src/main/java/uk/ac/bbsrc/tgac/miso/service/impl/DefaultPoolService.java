@@ -184,7 +184,6 @@ public class DefaultPoolService implements PoolService, AuthorizedPaginatedDataS
     }
 
     long savedId;
-    Pool managed;
     if (pool.getId() == PoolImpl.UNSAVED_ID) {
       pool.setName(generateTemporaryName());
       loadSecurityProfile(pool);
@@ -202,9 +201,8 @@ public class DefaultPoolService implements PoolService, AuthorizedPaginatedDataS
         throw new IOException("Invalid name for pool", e);
       }
       savedId = poolStore.save(pool);
-      managed = null;
     } else {
-      managed = poolStore.get(pool.getId());
+      Pool managed = poolStore.get(pool.getId());
       authorizationManager.throwIfNotWritable(managed);
       managed.setAlias(pool.getAlias());
       managed.setConcentration(pool.getConcentration());
@@ -242,7 +240,7 @@ public class DefaultPoolService implements PoolService, AuthorizedPaginatedDataS
       setChangeDetails(managed);
       savedId = poolStore.save(managed);
     }
-    boxService.updateBoxableLocation(pool, managed);
+    boxService.updateBoxableLocation(pool);
     return savedId;
   }
 

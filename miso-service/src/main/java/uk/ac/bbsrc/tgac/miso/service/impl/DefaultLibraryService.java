@@ -166,7 +166,7 @@ public class DefaultLibraryService implements LibraryService, AuthorizedPaginate
       library.setAlias(generateTemporaryName());
     }
     long savedId = save(library, true).getId();
-    boxService.updateBoxableLocation(library, null);
+    boxService.updateBoxableLocation(library);
     return savedId;
   }
 
@@ -181,7 +181,7 @@ public class DefaultLibraryService implements LibraryService, AuthorizedPaginate
     loadChildEntities(managed);
     makeChangeLogForIndices(originalIndices, managed.getIndices(), managed);
     save(managed, validateAliasUniqueness);
-    boxService.updateBoxableLocation(library, managed);
+    boxService.updateBoxableLocation(library);
   }
 
   @Override
