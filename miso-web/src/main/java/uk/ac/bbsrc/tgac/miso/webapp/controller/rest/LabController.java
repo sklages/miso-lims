@@ -28,6 +28,7 @@ import uk.ac.bbsrc.tgac.miso.core.data.Lab;
 import uk.ac.bbsrc.tgac.miso.dto.Dtos;
 import uk.ac.bbsrc.tgac.miso.dto.LabDto;
 import uk.ac.bbsrc.tgac.miso.service.LabService;
+import uk.ac.bbsrc.tgac.miso.webapp.controller.MenuController;
 
 @Controller
 @RequestMapping("/rest")
@@ -38,6 +39,9 @@ public class LabController extends RestController {
 
   @Autowired
   private LabService labService;
+
+  @Autowired
+  private MenuController menuController;
 
   private static LabDto writeUrls(LabDto labDto, UriComponentsBuilder uriBuilder) {
     URI baseUri = uriBuilder.build().toUri();
@@ -78,30 +82,34 @@ public class LabController extends RestController {
 
   @PostMapping(value = "/lab", headers = { "Content-type=application/json" })
   @ResponseBody
-  public LabDto createLab(@RequestBody LabDto labDto, UriComponentsBuilder uriBuilder) throws IOException {
+  public LabDto createLab(@RequestBody LabDto labDto, UriComponentsBuilder uriBuilder, HttpServletResponse response) throws IOException {
     Lab lab = Dtos.to(labDto);
     Long id = labService.create(lab, labDto.getInstituteId());
+    menuController.refreshConstants();
     return getLab(id, uriBuilder);
   }
 
   @PutMapping(value = "/lab/{id}", headers = { "Content-type=application/json" })
   @ResponseBody
   public LabDto updateLab(@PathVariable("id") Long id, @RequestBody LabDto labDto,
-      UriComponentsBuilder uriBuilder) throws IOException {
+      UriComponentsBuilder uriBuilder, HttpServletResponse response) throws IOException {
     Lab lab = Dtos.to(labDto);
     lab.setId(id);
     labService.update(lab, labDto.getInstituteId());
+    menuController.refreshConstants();
     return getLab(id, uriBuilder);
   }
 
   @DeleteMapping(value = "/lab/{id}")
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
-  public void deleteLab(@PathVariable(name = "id", required = true) long id, HttpServletResponse response) throws IOException {
+  public void deleteLab(@PathVariable(name = "id", required = true) long id, UriComponentsBuilder uriBuilder, HttpServletResponse response)
+      throws IOException {
     Lab lab = labService.get(id);
     if (lab == null) {
       throw new RestException("Lab " + id + " not found", Status.NOT_FOUND);
     }
     labService.delete(lab);
+    menuController.refreshConstants();
   }
 
 }

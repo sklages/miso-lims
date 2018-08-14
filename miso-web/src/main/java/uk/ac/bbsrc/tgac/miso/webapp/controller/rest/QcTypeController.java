@@ -45,11 +45,15 @@ import uk.ac.bbsrc.tgac.miso.core.data.type.QcType;
 import uk.ac.bbsrc.tgac.miso.dto.Dtos;
 import uk.ac.bbsrc.tgac.miso.dto.QcTypeDto;
 import uk.ac.bbsrc.tgac.miso.service.QcTypeService;
+import uk.ac.bbsrc.tgac.miso.webapp.controller.MenuController;
 
 @Controller
 @RequestMapping("/rest")
 @SessionAttributes("qctype")
 public class QcTypeController extends RestController {
+
+  @Autowired
+  private MenuController menuController;
 
   protected static final Logger log = LoggerFactory.getLogger(QcTypeController.class);
 
@@ -84,6 +88,7 @@ public class QcTypeController extends RestController {
       throws IOException {
     QcType qcType = Dtos.to(qcTypeDto);
     Long id = qcTypeService.create(qcType);
+    menuController.refreshConstants();
     return getQcType(id, uriBuilder, response);
   }
 
@@ -95,6 +100,7 @@ public class QcTypeController extends RestController {
     QcType qcType = Dtos.to(qcTypeDto);
     qcType.setQcTypeId(id);
     qcTypeService.update(qcType);
+    menuController.refreshConstants();
     return getQcType(id, uriBuilder, response);
   }
 

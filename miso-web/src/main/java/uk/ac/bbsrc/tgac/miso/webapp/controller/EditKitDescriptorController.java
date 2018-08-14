@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.eaglegenomics.simlims.core.User;
 import com.eaglegenomics.simlims.core.manager.SecurityManager;
@@ -62,6 +65,9 @@ public class EditKitDescriptorController {
   
   @Autowired
   private SecurityManager securityManager;
+
+  @Autowired
+  private MenuController menuController;
 
   @ModelAttribute("maxLengths")
   public Map<String, Integer> maxLengths() throws IOException {
@@ -113,12 +119,14 @@ public class EditKitDescriptorController {
   }
 
   @RequestMapping(method = RequestMethod.POST)
-  public String processSubmit(@ModelAttribute("kitDescriptor") KitDescriptor kitDescriptor, ModelMap model, SessionStatus session)
+  public String processSubmit(@ModelAttribute("kitDescriptor") KitDescriptor kitDescriptor, ModelMap model, SessionStatus session,
+      UriComponentsBuilder uriBuilder, HttpServletResponse response)
       throws IOException {
     try {
       User user = securityManager.getUserByLoginName(SecurityContextHolder.getContext().getAuthentication().getName());
       kitDescriptor.setLastModifier(user);
       kitService.saveKitDescriptor(kitDescriptor);
+      menuController.refreshConstants();
       session.setComplete();
       model.clear();
       return "redirect:/miso/kitdescriptor/" + kitDescriptor.getId();
